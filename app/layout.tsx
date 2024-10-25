@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import {Nunito} from "next/font/google";
 import "./globals.css";
-
+import { ClerkProvider, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { SignIn } from "@clerk/nextjs";
 
 const font = Nunito({ subsets : ["latin"]});
 
@@ -17,10 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={font.className}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={font.className}>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
