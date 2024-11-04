@@ -41,3 +41,59 @@ export const userProgressRelations = relations(userProgress, ({ one }) => ({
         references: [courses.courseId],
     }),
 }));
+
+// Units Table
+export const units = pgTable("units", {
+    unitId: bigserial("unit_id", { mode: "number" }).primaryKey(),
+    courseId: bigint("course_id", { mode: "number" }).references(() => courses.courseId),
+    title: text("title").notNull(),
+    description: text("description"),
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).notNull().defaultNow(),
+});
+
+// Lessons Table
+export const lessons = pgTable("lessons", {
+    lessonId: bigserial("lesson_id", { mode: "number" }).primaryKey(),
+    unitId: bigint("unit_id", { mode: "number" }).references(() => units.unitId),
+    title: text("title").notNull(),
+    description: text("description"),
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).notNull().defaultNow(),
+});
+
+// Questions Table
+export const questions = pgTable("questions", {
+    questionId: bigserial("question_id", { mode: "number" }).primaryKey(),
+    lessonId: bigint("lesson_id", { mode: "number" }).references(() => lessons.lessonId),
+    text: text("text").notNull(),
+    answers: text("answers").array().notNull(), // Array of possible answers
+    correctAnswer: integer("correct_answer").notNull(), // Index of correct answer
+    explanation: text("explanation"), // Optional explanation for the answer
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at", { mode: 'string' }).notNull().defaultNow(),
+});
+
+// Define additional relations
+export const unitsRelations = relations(units, ({ one, many }) => ({
+    course: one(courses, {
+        fields: [units.courseId],
+        references: [courses.courseId],
+    }),
+    lessons: many(lessons),
+}));
+
+export const lessonsRelations = relations(lessons, ({ one, many }) => ({
+    unit: one(units, {
+        fields: [lessons.unitId],
+        references: [units.unitId],
+    }),
+    questions: many(questions),
+}));
+
+export const questionsRelations = relations(questions, ({ one }) => ({
+    lesson: one(lessons, {
+        fields: [questions.lessonId],
+        references: [lessons.lessonId],
+    }),
+}));
