@@ -1,4 +1,4 @@
-import { bigint, index, integer, pgTable, text, timestamp, boolean, bigserial } from "drizzle-orm/pg-core";
+import { bigint, index, integer, pgTable, text, timestamp, boolean, bigserial, serial } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Courses Table
@@ -68,7 +68,6 @@ export const questionProgress = pgTable("question_progress", {
     isCompleted: boolean("is_completed").notNull().default(false),
     lastAttemptedAt: timestamp("last_attempted_at", { mode: 'string' }).defaultNow(),
 });
-
 // Define relations
 export const coursesRelations = relations(courses, ({ many }) => ({
     userProgress: many(userProgress),
@@ -111,3 +110,4 @@ export const questionProgressRelations = relations(questionProgress, ({ one }) =
         references: [questions.questionId],
     }),
 }));
+
