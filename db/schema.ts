@@ -1,9 +1,9 @@
-import { bigint, index, integer, pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { bigint, index, integer, pgTable, text, timestamp, boolean, bigserial } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Courses Table
 export const courses = pgTable("courses", {
-    courseId: bigint("course_id", { mode: "number" }).primaryKey(),
+    courseId: bigserial("course_id", { mode: "number" }).primaryKey(),
     title: text("title").notNull(),
     description: text("description"),
     imageSrc: text("image_src").notNull(),
