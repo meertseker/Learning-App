@@ -71,6 +71,7 @@ export const questions = pgTable("questions", {
     correctAnswer: integer("correct_answer").notNull(), // Index of correct answer
     explanation: text("explanation"), // Optional explanation for the answer
     order: integer("order").notNull(),
+    type: text("type").notNull().default('multiple-choice'), // Type of question (multiple-choice, fill-in-blank, etc)
     createdAt: timestamp("created_at", { mode: 'string' }).notNull().defaultNow(),
 });
 
