@@ -12,9 +12,11 @@ export const courses = pgTable("courses", {
     createdAt: timestamp("created_at", { mode: 'string' }).notNull().defaultNow(),
 });
 
+
+
 // UserProgress Table
 export const userProgress = pgTable("user_progress", {
-    id: bigint("id", { mode: "number" }).primaryKey(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     userId: text("user_id").notNull(),
     courseId: bigint("course_id", { mode: "number" }).references(() => courses.courseId),
     completedLessons: integer("completed_lessons").notNull().default(0),
@@ -68,9 +70,18 @@ export const questionProgress = pgTable("question_progress", {
     isCompleted: boolean("is_completed").notNull().default(false),
     lastAttemptedAt: timestamp("last_attempted_at", { mode: 'string' }).defaultNow(),
 });
+
+// LessonData Table - for storing user-created lesson content
+export const lessonData = pgTable("lesson_data", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    courseId: bigint("course_id", { mode: "number" }).references(() => courses.courseId),
+    content: text("content").notNull(),
+});
+
 // Define relations
 export const coursesRelations = relations(courses, ({ many }) => ({
     userProgress: many(userProgress),
+    lessonData: many(lessonData),
 }));
 
 export const userProgressRelations = relations(userProgress, ({ one }) => ({
@@ -108,6 +119,13 @@ export const questionProgressRelations = relations(questionProgress, ({ one }) =
     question: one(questions, {
         fields: [questionProgress.questionId],
         references: [questions.questionId],
+    }),
+}));
+
+export const lessonDataRelations = relations(lessonData, ({ one }) => ({
+    course: one(courses, {
+        fields: [lessonData.courseId],
+        references: [courses.courseId],
     }),
 }));
 

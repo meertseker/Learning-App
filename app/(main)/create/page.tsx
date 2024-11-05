@@ -5,11 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import { Mic, FileText, Type } from "lucide-react";
 import Link from "next/link";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMediaRecorder } from "../create/hooks/useMediaRecorder";
 import { toast } from "sonner";
 import { uploadToSupabase, uploadTextToSupabase, uploadFileToSupabase } from "@/app/(main)/create/supabase";
+import { useAuth } from "@clerk/nextjs";
+import { transcribeAudio } from "@/app/(main)/create/speechToText";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const CreateCourse = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +20,7 @@ const CreateCourse = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("voice");
+  const { userId } = useAuth();
 
   const {
     isRecording,
@@ -25,14 +29,31 @@ const CreateCourse = () => {
     audioBlob
   } = useMediaRecorder();
 
+  // Add loading state for auth
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Add useEffect to check auth status
+  useEffect(() => {
+    if (!userId) {
+      router.push('/sign-in');
+    } else {
+      setAuthChecked(true);
+    }
+  }, [userId, router]);
+
+  // Return loading state or redirect if not authenticated
+  if (!authChecked) {
+    return <div>Loading...</div>;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
       const tempCourseId = `course-${Date.now()}`;
-      const userId = "mertseker3"; // This should come from your auth context
-
+      if (!userId) throw new Error("User not authenticated");
+        
       // Create an array to store all upload promises
       const uploadPromises = [];
 
@@ -63,17 +84,40 @@ const CreateCourse = () => {
         });
         console.log("Uploading audio file...");
         const audioPromise = uploadFileToSupabase(audioFile, userId, tempCourseId)
-          .then(({ publicUrl: audioUrl }) => {
+          .then(async ({ publicUrl: audioUrl }) => {
             console.log("Audio uploaded, URL:", audioUrl);
-            return createCourse({
-              title: "Voice Recording",
-              fileUrl: audioUrl,
-              userId,
-              courseId: tempCourseId,
-              type: "audio",
-              content: "",
-              createdAt: new Date().toISOString()
-            });
+            
+            try {
+              // Get transcription
+              console.log("Starting transcription for URL:", audioUrl);
+              const transcript = await transcribeAudio(audioUrl);
+              console.log("Transcription completed successfully:", transcript);
+              if (!transcript) {
+                console.warn("Transcription returned empty result");
+              }
+
+              return createCourse({
+                title: "Voice Recording",
+                fileUrl: audioUrl,
+                userId,
+                courseId: tempCourseId,
+                type: "audio",
+                content: transcript || "Transcription failed", // Provide fallback
+                createdAt: new Date().toISOString()
+              });
+            } catch (transcriptionError) {
+              console.error("Transcription failed:", transcriptionError);
+              // Still create the course even if transcription fails
+              return createCourse({
+                title: "Voice Recording",
+                fileUrl: audioUrl,
+                userId,
+                courseId: tempCourseId,
+                type: "audio",
+                content: "Transcription failed - Audio file available",
+                createdAt: new Date().toISOString()
+              });
+            }
           });
         uploadPromises.push(audioPromise);
       }
@@ -279,4 +323,11 @@ const CreateCourse = () => {
   );
 };
 
-export default CreateCourse;
+// Wrap the export in a client component
+export default function CreatePage() {
+  return (
+    <ClerkProvider>
+      <CreateCourse />
+    </ClerkProvider>
+  );
+}
