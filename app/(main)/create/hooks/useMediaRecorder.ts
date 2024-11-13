@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 // app/(main)/create/hooks/useMediaRecorder.ts
 
+=======
+>>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4
 import { useState, useCallback } from 'react';
 
 export const useMediaRecorder = () => {
@@ -47,4 +50,8 @@ export const useMediaRecorder = () => {
     audioBlob,
     setAudioBlob
   };
+<<<<<<< HEAD
 };
+=======
+}; 
+>>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4
