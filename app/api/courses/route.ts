@@ -1,17 +1,12 @@
-<<<<<<< HEAD
 // app/api/courses/route.ts
 
 import { NextResponse } from 'next/server';
 import db from "@/db/drizzle";
 import { courses, userProgress } from '@/db/schema';
-=======
-import { NextResponse } from 'next/server';
->>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-<<<<<<< HEAD
     
     const { title, content, description, imageSrc, isActive, userId } = body;
 
@@ -45,21 +40,3 @@ export async function POST(request: Request) {
     return new NextResponse('Internal Error', { status: 500 });
   }
 }
-=======
-    const { title, fileUrl, userId, courseId, type, content } = body;
-
-    // Here you would typically save to your database
-    // For now, we'll just return a success response
-    return NextResponse.json({ 
-      courseId,
-      message: "Course created successfully" 
-    });
-  } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { message: error.message || "Failed to create course" },
-      { status: 500 }
-    );
-  }
-} 
->>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4

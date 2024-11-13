@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 // app/api/transcribe/route.ts
 
-=======
->>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 
@@ -90,8 +87,4 @@ export async function POST(request: Request) {
       { status: 503 }
     );
   }
-<<<<<<< HEAD
 }
-=======
-} 
->>>>>>> 6b53e2b1458913382595d02a92a64f54670453f4
