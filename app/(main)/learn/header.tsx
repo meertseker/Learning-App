@@ -19,7 +19,6 @@ export const Header = ({ title } : Props) => {
                 {title}
             </h1>
             <div/>
-            
         </div>
     )
 }

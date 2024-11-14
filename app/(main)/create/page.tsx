@@ -89,30 +89,12 @@ const CreateCourse = () => {
         contentParts.push(extractedText);
       }
 
-      const combinedContent = contentParts.join('\n\n==========\n\n');
-      console.log("Content combined, saving to database...");
+      console.log('Content parts before combining:', contentParts);
+      const combinedText = contentParts.join('\n\n=== NEW SECTION ===\n\n');
+      console.log('Combined text before sending:', combinedText);
 
-      let savedCourse;
-      try {
-        savedCourse = await saveContentToDatabase({
-          title,
-          content: combinedContent,
-          userId: userId!,
-        });
-        console.log("Course saved successfully:", savedCourse);
-      } catch (dbError) {
-        console.error("Database save error:", dbError);
-        toast.error("Failed to save course to database");
-        return;
-      }
-
-      try {
-        await sendCombinedText(combinedContent);
-        console.log("Text processing completed");
-      } catch (processError) {
-        console.error("Text processing error:", processError);
-        toast.error("Course saved but text processing failed");
-      }
+      await sendCombinedText(combinedText);
+      console.log("Text processing completed");
 
       toast.success("Course created successfully!");
       router.push('/library');
@@ -173,33 +155,23 @@ const CreateCourse = () => {
 
   const sendCombinedText = async (text: string) => {
     try {
+      console.log('Sending combined text to process:', text);
+      
       const response = await fetch('/api/processText', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
         body: JSON.stringify({ text })
       });
 
-      // Log full response details
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-
-      // Check if the response is HTML (indicating an error page)
-      if (responseText.trim().toLowerCase().startsWith('<!doctype')) {
-        throw new Error('Received HTML instead of JSON. The API endpoint might be throwing a server error.');
-      }
-
-      try {
-        return JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
-        throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}...`);
-      }
+      const result = await response.json();
+      console.log('Process text response:', result);
+      return result;
     } catch (error) {
       console.error('Error in sendCombinedText:', error);
       throw error;
@@ -293,7 +265,7 @@ const CreateCourse = () => {
                 type="file"
                 className="hidden"
                 id="file-upload"
-                accept=".pdf,.doc,.docx,.txt"
+                accept=".pdf,.jpg,.jpeg,.png,.tiff"
                 onChange={handleFileChange}
               />
               <label

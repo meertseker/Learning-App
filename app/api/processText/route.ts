@@ -1,17 +1,21 @@
-// app/api/processText/route.ts
-
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
-    // Process the combined text as needed
-    // For example, send it to an external API or save it to the database
+    
+    console.log('=== START OF COMBINED TEXT ===');
+    console.log(text);
+    console.log('=== END OF COMBINED TEXT ===');
+    console.log('Text length:', text.length);
+    console.log('Number of sections:', text.split('=== NEW SECTION ===').length);
 
-    // Placeholder: Log the text
-    console.log('Received combined text:', text);
-
-    return NextResponse.json({ message: 'Text processed successfully' });
+    return NextResponse.json({ 
+      message: 'Text processed successfully',
+      textLength: text.length,
+      sections: text.split('=== NEW SECTION ===').length,
+      preview: text.substring(0, 100) + '...'
+    });
   } catch (error: any) {
     console.error('Error processing text:', error);
     return NextResponse.json(

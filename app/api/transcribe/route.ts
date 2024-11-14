@@ -75,7 +75,14 @@ export async function POST(request: Request) {
     const transcription = await transcribeWithRetry(audioUrl);
     console.log('Transcription result:', transcription);
     
-    return NextResponse.json({ text: transcription });
+    console.log('Transcription length:', transcription.length);
+    
+    return NextResponse.json({ 
+      text: transcription,
+      metadata: {
+        length: transcription.length
+      }
+    });
   } catch (error: any) {
     console.error('Transcription error:', error);
     return NextResponse.json(
